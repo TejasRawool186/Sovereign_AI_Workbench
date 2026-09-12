@@ -4,7 +4,10 @@ export type AgentNodeName =
   | "recommend"
   | "human_checkpoint"
   | "generate_docx"
-  | "monte_carlo";
+  | "monte_carlo"
+  | "code_generate"
+  | "sandbox_execute"
+  | "sandbox_verify";
 
 export type AgentNodeStatus =
   | "pending"

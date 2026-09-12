@@ -71,8 +71,25 @@ export function FeatureBentoGrid() {
   ];
 
   return (
-    <section id="capabilities" className="py-20 border-t border-border-subtle">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+    <section id="capabilities" className="relative py-20 border-t border-border-subtle overflow-hidden">
+      {/* Wide Cinematic Refinery Landscape Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-no-repeat bg-[center_top] sm:bg-[center_top_18%] md:bg-center pointer-events-none"
+        style={{
+          backgroundImage: "url('/img/3.png')",
+        }}
+      />
+
+      {/* Subtle dark blue gradient overlay - lightened for rich landscape visibility */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(7, 16, 27, 0.52) 0%, rgba(6, 14, 23, 0.35) 40%, rgba(7, 16, 27, 0.62) 100%)",
+        }}
+      />
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center max-w-3xl mx-auto mb-14">
           <Badge variant="accent" className="mb-3">
             MISSION-CRITICAL CAPABILITIES

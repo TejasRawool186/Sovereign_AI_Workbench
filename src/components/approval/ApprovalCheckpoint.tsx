@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   XCircle,
   Edit3,
-  Lock,
   KeyRound,
   FileCheck,
   UserCheck,
@@ -32,7 +31,7 @@ export function ApprovalCheckpoint() {
   const [isEditing, setIsEditing] = useState(false);
   const [customComment, setCustomComment] = useState(
     activeApprovalData?.recommendedAction ||
-      "Emergency ASTM A335 Grade P22 replacement spool piece fabrication authorized for October 2026 mini-shutdown."
+    "Schedule emergency ASTM A335 P22 replacement spool installation during October 2026 mini-shutdown. Perform PAUT confirmation within 60 days."
   );
   const [isSigning, setIsSigning] = useState(false);
 
@@ -46,88 +45,114 @@ export function ApprovalCheckpoint() {
 
   const handleReject = () => {
     const reason = prompt("Enter reason for rejection:");
-    if (reason) {
-      rejectStep(reason);
-    }
+    if (reason) rejectStep(reason);
   };
+
+  const gridItems = [
+    { label: "Asset / Report",     value: activeApprovalData?.asset || "MRPL HC Unit 3 · HC-102-B",   sub: activeApprovalData?.reportId || "NDT-2026-00481" },
+    { label: "Monitoring Point",   value: activeApprovalData?.criticalPoint || "CML-HC-102-B",         sub: null },
+    { label: "Measured Wall",      value: activeApprovalData?.currentThickness || "3.20 mm",           sub: null, warn: true },
+    { label: "MAWT Limit",         value: activeApprovalData?.mawt || "2.50 mm",                       sub: null, danger: true },
+    { label: "Remaining Life",     value: activeApprovalData?.remainingLife || "1.24 Years",           sub: null, danger: true },
+    { label: "Corrosion Rate",     value: "0.564 mm/yr",                                               sub: null, danger: true },
+  ];
 
   return (
     <Modal
       isOpen={isApprovalModalOpen}
       onClose={() => setApprovalModalOpen(false)}
       maxWidth="2xl"
-      title="Human-in-the-Loop (HITL) Safety Gate"
-      description="Mandatory verification gate enforced by OISD-105 & API 570 compliance policies."
+      title="Human-in-the-Loop Safety Gate"
+      description="Mandatory verification gate — OISD-105 & API 570 compliance policies require authorised engineer sign-off."
     >
-      <div className="space-y-5 select-none">
-        {/* Warning Banner */}
-        <div className="p-4 rounded-xl bg-status-warning/10 border border-status-warning/30 flex items-start gap-3.5">
-          <div className="w-10 h-10 rounded-lg bg-status-warning/20 border border-status-warning/40 flex items-center justify-center text-status-warning shrink-0">
-            <AlertTriangle className="w-5 h-5" />
+      <div className="space-y-4">
+
+        {/* ── Warning banner ── */}
+        <div
+          className="flex items-start gap-3 px-4 py-3.5 rounded-xl"
+          style={{
+            background: "rgba(229,184,92,0.08)",
+            border: "1px solid rgba(229,184,92,0.25)",
+          }}
+        >
+          <div
+            className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+            style={{ background: "rgba(229,184,92,0.12)", border: "1px solid rgba(229,184,92,0.25)" }}
+          >
+            <AlertTriangle className="w-5 h-5" style={{ color: "var(--wb-warning)" }} />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h4 className="text-sm font-bold text-status-warning">
+            <div className="flex items-center gap-2 flex-wrap mb-0.5">
+              <span className="text-sm font-bold" style={{ color: "var(--wb-warning)" }}>
                 CRITICAL THICKNESS LOSS DETECTED
-              </h4>
-              <Badge variant="danger" size="sm">
+              </span>
+              <span
+                className="text-[10px] font-semibold font-mono px-1.5 py-0.5 rounded"
+                style={{
+                  background: "rgba(228,106,106,0.12)",
+                  color: "var(--wb-danger)",
+                  border: "1px solid rgba(228,106,106,0.22)",
+                }}
+              >
                 Remaining Life &lt; 2 Years
-              </Badge>
+              </span>
             </div>
-            <p className="text-xs text-primary-secondary mt-1 leading-relaxed">
-              Automated agent execution has been halted. API 570 standards mandate authorized engineer digital sign-off before official deliverable synthesis.
+            <p className="text-[12px]" style={{ color: "var(--wb-text-muted)" }}>
+              Automated execution halted. API 570 mandates authorised engineer digital sign-off before official deliverable synthesis.
             </p>
           </div>
         </div>
 
-        {/* Telemetry Summary Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-xl bg-surface border border-border-subtle">
-          <div>
-            <span className="text-[10px] font-mono uppercase text-primary-muted">
-              Monitoring Point
-            </span>
-            <div className="text-xs font-bold text-primary font-mono mt-0.5">
-              {activeApprovalData?.criticalPoint || "CML-HC-101A"}
+        {/* ── Telemetry grid ── */}
+        <div
+          className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3.5 rounded-xl"
+          style={{
+            background: "var(--wb-surface)",
+            border: "1px solid var(--wb-border-subtle)",
+          }}
+        >
+          {gridItems.map(({ label, value, sub, warn, danger }) => (
+            <div key={label} className="space-y-0.5">
+              <div
+                className="text-[10px] font-mono uppercase tracking-wider"
+                style={{ color: "var(--wb-text-muted)" }}
+              >
+                {label}
+              </div>
+              <div
+                className="text-[12px] font-bold font-mono"
+                style={{
+                  color: danger
+                    ? "var(--wb-danger)"
+                    : warn
+                    ? "var(--wb-warning)"
+                    : "var(--wb-text)",
+                }}
+              >
+                {value}
+              </div>
+              {sub && (
+                <div className="text-[10px] font-mono" style={{ color: "var(--wb-text-muted)" }}>
+                  {sub}
+                </div>
+              )}
             </div>
-          </div>
-          <div>
-            <span className="text-[10px] font-mono uppercase text-primary-muted">
-              Measured Wall
-            </span>
-            <div className="text-xs font-bold text-status-warning font-mono mt-0.5">
-              {activeApprovalData?.currentThickness || "7.8 mm"}
-            </div>
-          </div>
-          <div>
-            <span className="text-[10px] font-mono uppercase text-primary-muted">
-              MAWT Limit
-            </span>
-            <div className="text-xs font-bold text-status-danger font-mono mt-0.5">
-              {activeApprovalData?.mawt || "6.5 mm"}
-            </div>
-          </div>
-          <div>
-            <span className="text-[10px] font-mono uppercase text-primary-muted">
-              Remaining Life
-            </span>
-            <div className="text-xs font-bold text-status-danger font-mono mt-0.5">
-              {activeApprovalData?.remainingLife || "1.58 Years"}
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Action Recommendation Box */}
+        {/* ── Recommendation ── */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-primary">
+            <span className="text-sm font-semibold" style={{ color: "var(--wb-text)" }}>
               Proposed Maintenance Recommendation
             </span>
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="text-[11px] text-accent hover:text-accent-hover font-mono flex items-center gap-1"
+              className="flex items-center gap-1 text-[11px] font-medium transition-colors"
+              style={{ color: "var(--wb-teal)" }}
             >
               <Edit3 className="w-3 h-3" />
-              <span>{isEditing ? "Lock Text" : "Edit Recommendation"}</span>
+              {isEditing ? "Lock" : "Edit"}
             </button>
           </div>
 
@@ -136,37 +161,68 @@ export function ApprovalCheckpoint() {
               rows={3}
               value={customComment}
               onChange={(e) => setCustomComment(e.target.value)}
-              className="w-full p-3 rounded-xl bg-surface border border-border-focus text-xs text-primary focus:outline-none leading-relaxed"
+              className="w-full px-3 py-2.5 rounded-lg text-[13px] focus:outline-none resize-none leading-relaxed"
+              style={{
+                background: "var(--wb-surface)",
+                border: "1px solid var(--wb-teal)",
+                color: "var(--wb-text)",
+              }}
             />
           ) : (
-            <div className="p-3.5 rounded-xl bg-surface border border-border-subtle text-xs text-primary leading-relaxed">
+            <div
+              className="px-3.5 py-2.5 rounded-lg text-[13px] leading-relaxed"
+              style={{
+                background: "var(--wb-surface)",
+                border: "1px solid var(--wb-border-subtle)",
+                color: "var(--wb-text-sec)",
+              }}
+            >
               {customComment}
             </div>
           )}
         </div>
 
-        {/* Cryptographic PIN Sign-off Box */}
-        <div className="p-4 rounded-xl bg-surface border border-border-medium space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-border-subtle">
+        {/* ── PIN sign-off ── */}
+        <div
+          className="rounded-xl p-4 space-y-3"
+          style={{
+            background: "var(--wb-surface)",
+            border: "1px solid var(--wb-border-medium)",
+          }}
+        >
+          <div
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5"
+            style={{ borderBottom: "1px solid var(--wb-border-subtle)" }}
+          >
             <div className="flex items-center gap-2">
-              <UserCheck className="w-4 h-4 text-accent" />
-              <span className="text-xs font-semibold text-primary">
-                Operator Sign-off Credentials
+              <UserCheck className="w-4 h-4" style={{ color: "var(--wb-teal)" }} />
+              <span className="text-sm font-semibold" style={{ color: "var(--wb-text)" }}>
+                Operator Sign-off
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-primary font-bold">
+              <span className="text-[12px] font-semibold font-mono" style={{ color: "var(--wb-text)" }}>
                 {operatorName}
               </span>
-              <Badge variant="accent" size="sm">
+              <span
+                className="text-[10px] font-semibold font-mono px-1.5 py-0.5 rounded"
+                style={{
+                  background: "var(--wb-teal-soft)",
+                  color: "var(--wb-teal)",
+                  border: "1px solid rgba(56,184,176,0.22)",
+                }}
+              >
                 {operatorRole}
-              </Badge>
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
-              <label className="text-[10px] font-mono uppercase text-primary-muted block mb-1">
+          <div className="flex items-end gap-3">
+            <div className="flex-1 space-y-1.5">
+              <label
+                className="text-[10px] font-mono uppercase tracking-wider"
+                style={{ color: "var(--wb-text-muted)" }}
+              >
                 Authorization PIN (SHA-256 Seed)
               </label>
               <div className="relative">
@@ -174,48 +230,73 @@ export function ApprovalCheckpoint() {
                   type="password"
                   value={pin}
                   onChange={(e) => setPin(e.target.value)}
-                  placeholder="Enter PIN..."
-                  className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-surface-card border border-border-medium text-xs font-mono text-primary focus:outline-none focus:border-border-focus"
+                  placeholder="Enter PIN…"
+                  className="w-full pl-8 pr-3 py-2 rounded-lg text-[13px] font-mono focus:outline-none transition-colors"
+                  style={{
+                    background: "var(--wb-surface-card)",
+                    border: "1px solid var(--wb-border-medium)",
+                    color: "var(--wb-text)",
+                  }}
+                  onFocus={e => (e.currentTarget.style.borderColor = "var(--wb-teal)")}
+                  onBlur={e => (e.currentTarget.style.borderColor = "var(--wb-border-medium)")}
                 />
-                <KeyRound className="w-3.5 h-3.5 text-primary-muted absolute left-2.5 top-2" />
+                <KeyRound
+                  className="w-3.5 h-3.5 absolute left-2.5 top-2.5"
+                  style={{ color: "var(--wb-text-muted)" }}
+                />
               </div>
             </div>
-
-            <div className="text-[11px] font-mono text-status-success pt-4">
-              ✓ Hardware Key Validated
+            <div
+              className="flex items-center gap-1.5 text-[11px] font-semibold font-mono pb-2"
+              style={{ color: "var(--wb-success)" }}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              Hardware Key Valid
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <Button
-            variant="danger"
+        {/* ── Action buttons ── */}
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <button
             onClick={handleReject}
-            size="sm"
-            className="gap-1.5 text-xs font-semibold"
+            className="flex items-center gap-1.5 px-3 h-9 rounded-lg text-[13px] font-semibold transition-colors"
+            style={{
+              background: "rgba(228,106,106,0.08)",
+              border: "1px solid rgba(228,106,106,0.25)",
+              color: "var(--wb-danger)",
+            }}
           >
             <XCircle className="w-4 h-4" />
-            <span>Reject Recommendation</span>
-          </Button>
+            Reject
+          </button>
 
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={() => setApprovalModalOpen(false)}
+              className="px-3 h-9 rounded-lg text-[13px] font-medium transition-colors"
+              style={{
+                background: "transparent",
+                border: "1px solid var(--wb-border-medium)",
+                color: "var(--wb-text-sec)",
+              }}
             >
               Cancel
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={handleApprove}
-              isLoading={isSigning}
-              size="sm"
-              className="bg-accent hover:bg-accent-hover text-white font-bold gap-2 shadow-glow text-xs px-5"
+              disabled={isSigning}
+              className="flex items-center gap-1.5 px-5 h-9 rounded-lg text-[13px] font-bold transition-colors disabled:opacity-50"
+              style={{
+                background: "var(--wb-teal)",
+                color: "#07151D",
+                border: "none",
+                cursor: isSigning ? "wait" : "pointer",
+              }}
             >
               <FileCheck className="w-4 h-4" />
-              <span>Approve & Sign Deliverable</span>
-            </Button>
+              {isSigning ? "Signing…" : "Approve & Sign"}
+            </button>
           </div>
         </div>
       </div>

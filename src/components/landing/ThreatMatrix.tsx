@@ -36,8 +36,25 @@ export function ThreatMatrix() {
   ];
 
   return (
-    <section id="threat-matrix" className="py-20 border-t border-border-subtle bg-surface/30">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+    <section id="threat-matrix" className="relative py-20 border-t border-border-subtle bg-surface/30 overflow-hidden">
+      {/* Technical Blueprint Engineering Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-no-repeat bg-center pointer-events-none"
+        style={{
+          backgroundImage: "url('/img/2.png')",
+        }}
+      />
+
+      {/* Dark navy overlay - lightened so blueprint drawing lines and details shine through */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(8, 17, 28, 0.58) 0%, rgba(6, 14, 24, 0.42) 50%, rgba(8, 17, 28, 0.68) 100%)",
+        }}
+      />
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center max-w-3xl mx-auto mb-14">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-danger/10 border border-status-danger/30 text-status-danger text-xs font-mono mb-3">
             <ShieldAlert className="w-3.5 h-3.5" />
@@ -52,11 +69,11 @@ export function ThreatMatrix() {
         </div>
 
         {/* Matrix Table */}
-        <div className="rounded-2xl border border-border-medium bg-surface-card overflow-hidden shadow-card">
+        <div className="rounded-2xl border border-[#071B26]/60 bg-[#071B26]/75 backdrop-blur-md overflow-hidden shadow-card">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-border-subtle bg-surface-raised">
+                <tr className="border-b border-[#071B26]/60 bg-[#071B26]/80">
                   <th className="p-4 sm:p-5 text-xs font-semibold text-primary-secondary uppercase tracking-wider w-1/4">
                     Evaluation Dimension
                   </th>
@@ -69,7 +86,7 @@ export function ThreatMatrix() {
                   <th className="p-4 sm:p-5 text-xs font-semibold text-status-success uppercase tracking-wider w-[37.5%]">
                     <div className="flex items-center gap-1.5">
                       <ShieldCheck className="w-4 h-4" />
-                      OnPremisAI Sovereign Enclave
+                      ABHEDYA AI Sovereign Enclave
                     </div>
                   </th>
                 </tr>

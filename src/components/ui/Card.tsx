@@ -11,12 +11,17 @@ export function Card({
   children,
   ...props
 }: CardProps) {
-  const variants = {
-    default: "bg-surface-card border border-border-subtle rounded-xl",
-    elevated: "bg-surface-raised border border-border-medium shadow-floating rounded-xl",
+  const variants: Record<string, string> = {
+    default:
+      "bg-[#102A35] border border-[rgba(145,190,200,0.10)] rounded-xl",
+    elevated:
+      "bg-[#102A35] border border-[rgba(145,190,200,0.14)] rounded-xl shadow-[0_2px_16px_rgba(0,0,0,0.24)]",
     interactive:
-      "bg-surface-card border border-border-subtle hover:border-border-medium hover:bg-surface-hover transition-all duration-150 cursor-pointer rounded-xl",
-    flat: "bg-surface border border-border-subtle rounded-xl",
+      "bg-[#102A35] border border-[rgba(145,190,200,0.10)] rounded-xl " +
+      "hover:bg-[#13303D] hover:border-[rgba(145,190,200,0.18)] " +
+      "transition-colors duration-150 cursor-pointer",
+    flat:
+      "bg-[#0D222C] border border-[rgba(145,190,200,0.08)] rounded-xl",
   };
 
   return (

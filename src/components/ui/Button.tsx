@@ -1,8 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";
   size?: "sm" | "md" | "lg" | "icon";
   isLoading?: boolean;
@@ -21,34 +20,38 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const baseStyles =
-      "inline-flex items-center justify-center font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:pointer-events-none disabled:opacity-40 select-none cursor-pointer";
+    const base =
+      "inline-flex items-center justify-center font-medium transition-colors duration-150 " +
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38B8B0]/40 " +
+      "disabled:pointer-events-none disabled:opacity-40 select-none cursor-pointer";
 
-    const variants = {
+    const variants: Record<string, string> = {
       primary:
-        "bg-accent text-white hover:bg-accent-hover active:bg-accent-pressed shadow-sm",
+        "bg-[#38B8B0] text-[#07151D] hover:bg-[#44C9C1] active:bg-[#2FA09A]",
       secondary:
-        "bg-surface-card text-primary hover:bg-surface-hover border border-border-subtle",
+        "bg-[#102A35] text-[#B6C4CA] hover:bg-[#13303D] border border-[rgba(145,190,200,0.16)]",
       outline:
-        "border border-border-medium bg-transparent text-primary hover:bg-surface-hover",
+        "border border-[rgba(145,190,200,0.16)] bg-transparent text-[#B6C4CA] " +
+        "hover:bg-[#13303D] hover:border-[rgba(145,190,200,0.26)]",
       ghost:
-        "bg-transparent text-primary-secondary hover:text-primary hover:bg-surface-hover",
+        "bg-transparent text-[#7F929B] hover:text-[#B6C4CA] hover:bg-[#13303D]",
       danger:
-        "bg-status-danger/15 text-status-danger hover:bg-status-danger/25 border border-status-danger/30",
+        "bg-[rgba(228,106,106,0.08)] text-[#E46A6A] hover:bg-[rgba(228,106,106,0.15)] " +
+        "border border-[rgba(228,106,106,0.25)]",
     };
 
-    const sizes = {
-      sm: "h-8 px-3 text-[13px] rounded-lg gap-1.5",
-      md: "h-9 px-4 text-sm rounded-lg gap-2",
-      lg: "h-10 px-5 text-sm rounded-xl gap-2",
-      icon: "h-8 w-8 p-0 rounded-lg justify-center",
+    const sizes: Record<string, string> = {
+      sm:   "h-8  px-3   text-[12.5px] rounded-lg  gap-1.5",
+      md:   "h-9  px-4   text-[13px]   rounded-lg  gap-2",
+      lg:   "h-10 px-5   text-sm       rounded-xl  gap-2",
+      icon: "h-8  w-8  p-0             rounded-lg  justify-center",
     };
 
     return (
       <button
         ref={ref}
         disabled={disabled || isLoading}
-        className={cn(baseStyles, variants[variant], sizes[size], className)}
+        className={cn(base, variants[variant], sizes[size], className)}
         {...props}
       >
         {isLoading && (
@@ -59,11 +62,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           >
             <circle
               className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
+              cx="12" cy="12" r="10"
+              stroke="currentColor" strokeWidth="4"
             />
             <path
               className="opacity-75"

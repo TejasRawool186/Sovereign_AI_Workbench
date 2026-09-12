@@ -17,7 +17,7 @@ export type TaskStatus =
 export interface TaskItem {
   id: string;
   title: string;
-  category: "UT_AUDIT" | "VIBRATION_FFT" | "OISD_PERMIT" | "CORROSION_RATE" | "CUSTOM";
+  category: "UT_AUDIT" | "VIBRATION_FFT" | "OISD_PERMIT" | "CORROSION_RATE" | "CODE_VERIFY" | "CUSTOM";
   status: TaskStatus;
   createdAt: string;
   updatedAt: string;
