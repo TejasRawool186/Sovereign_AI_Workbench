@@ -12,7 +12,12 @@ import { ModelConfigModal } from "@/components/chat/ModelConfigModal";
 import { ArenaComparisonView } from "@/components/chat/ArenaComparisonView";
 
 export default function WorkbenchPage() {
-  const { activeView, modelConfig } = useTaskStore();
+  const { activeView, modelConfig, createNewTask } = useTaskStore();
+
+  React.useEffect(() => {
+    // When entering workbench, start with a fresh new chat
+    createNewTask();
+  }, [createNewTask]);
 
   const renderActiveView = () => {
     if (modelConfig.isArenaMode && activeView === "tasks") {

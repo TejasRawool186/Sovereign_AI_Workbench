@@ -58,7 +58,7 @@ function TrustBoundary() {
       <div className="absolute inset-0 pointer-events-none overlay-security" />
 
       <div className="relative z-10 container-landing">
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="text-center max-w-2xl mx-auto mb-12 scroll-reveal">
           <div
             className="inline-flex items-center gap-2 status-badge mb-5"
             style={{
@@ -82,7 +82,7 @@ function TrustBoundary() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto">
           {/* Outside */}
           <div
-            className="rounded-xl p-6"
+            className="rounded-xl p-6 scroll-reveal-scale delay-150"
             style={{
               background: "rgba(228,106,106,0.06)",
               border: "1px solid rgba(228,106,106,0.22)",
@@ -112,7 +112,7 @@ function TrustBoundary() {
 
           {/* Inside */}
           <div
-            className="rounded-xl p-6"
+            className="rounded-xl p-6 scroll-reveal-scale delay-300"
             style={{
               background: "rgba(56,184,176,0.06)",
               border: "1px solid rgba(56,184,176,0.22)",
@@ -149,24 +149,24 @@ function TrustBoundary() {
 function NotAChatbot() {
   const capabilities = [
     {
-      icon: FileScan,
-      label: "Reads scanned inspection files",
-      detail: "PaddleOCR + PyMuPDF, multimodal vision",
+      icon: Terminal,
+      label: "Ingests real inspection spreadsheets & PDFs",
+      detail: "XLSX · PDF · CSV · DWG metadata",
     },
     {
       icon: Database,
-      label: "Retrieves SOP evidence",
-      detail: "ChromaDB · API 570 · OISD-105 · MRPL",
-    },
-    {
-      icon: Terminal,
-      label: "Runs sandboxed calculations",
-      detail: "Docker --network none · exit-0 verified",
+      label: "Queries local OISD/API/ASME vector store",
+      detail: "OISD-142 · API-570 · ASME B31.3",
     },
     {
       icon: BookOpen,
-      label: "Checks its own output (Self-RAG)",
-      detail: "Flags unsupported claims, routes for review",
+      label: "Calculates corrosion rate & remaining life",
+      detail: "Formula: Cr = (T_prev - T_act) / Yrs",
+    },
+    {
+      icon: FileScan,
+      label: "Auto-detects high-risk discrepancies",
+      detail: "Red-flag highlighting · anomaly score",
     },
     {
       icon: UserCheck,
@@ -179,6 +179,8 @@ function NotAChatbot() {
       detail: "Inspection_Approval_Note_HC-102-B.docx",
     },
   ];
+
+  const delays = ["delay-75", "delay-150", "delay-225", "delay-300", "delay-375", "delay-450"];
 
   return (
     <section
@@ -200,7 +202,7 @@ function NotAChatbot() {
       <div className="absolute inset-0 pointer-events-none overlay-feature" />
 
       <div className="relative z-10 container-landing">
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="text-center max-w-2xl mx-auto mb-12 scroll-reveal">
           <h2 className="heading-section" style={{ color: "#F0F4F6" }}>
             Not a Chatbot
           </h2>
@@ -214,7 +216,7 @@ function NotAChatbot() {
           {capabilities.map((cap, i) => {
             const Icon = cap.icon;
             return (
-              <div key={i} className="feature-card">
+              <div key={i} className={`feature-card scroll-reveal ${delays[i] || ""}`}>
                 <div
                   className="flex items-center justify-center w-10 h-10 rounded-xl shrink-0"
                   style={{
@@ -253,72 +255,187 @@ function NotAChatbot() {
 
 /* ─── Page ───────────────────────────────────────────────────────────────── */
 export default function LandingPage() {
+  const [scrollProgress, setScrollProgress] = React.useState(0);
+  const [isScrolled, setIsScrolled] = React.useState(false);
+  const [activeSection, setActiveSection] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    if (!window.location.hash) {
+      window.scrollTo(0, 0);
+    }
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
+      setScrollProgress(progress);
+      setIsScrolled(scrollY > 24);
+
+      // Scroll-spy active section detection
+      const sectionIds = ["how-it-works", "pipeline", "trust"];
+      const offset = 120;
+      let current: string | null = null;
+
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= offset && rect.bottom > offset) {
+            current = id;
+            break;
+          }
+        }
+      }
+      setActiveSection(current);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    // IntersectionObserver for scroll-reveal animations
+    const revealElements = document.querySelectorAll(".scroll-reveal, .scroll-reveal-scale");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-revealed");
+          }
+        });
+      },
+      {
+        threshold: 0.05,
+        rootMargin: "0px 0px -10px 0px",
+      }
+    );
+
+    revealElements.forEach((el) => observer.observe(el));
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      observer.disconnect();
+    };
+  }, []);
+
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("#")) {
+      e.preventDefault();
+      const targetId = href.substring(1);
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        const topPos = targetEl.getBoundingClientRect().top + window.scrollY - 64;
+        window.scrollTo({ top: topPos, behavior: "smooth" });
+      }
+    }
+  };
+
   return (
     <div style={{ background: "#06131C", color: "#F0F4F6", minHeight: "100vh" }}>
 
-      {/* Navigation */}
+      {/* Navigation with dynamic glassmorphism and scroll progress bar */}
       <header
-        className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 sm:px-6 select-none"
+        className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 sm:px-6 select-none transition-all duration-300"
         style={{
           height: "56px",
-          background: "rgba(6,19,28,0.92)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
-          borderBottom: "1px solid rgba(56,184,176,0.08)",
+          background: isScrolled ? "rgba(6,19,28,0.96)" : "rgba(6,19,28,0.85)",
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+          borderBottom: isScrolled
+            ? "1px solid rgba(56,184,176,0.18)"
+            : "1px solid rgba(56,184,176,0.06)",
+          boxShadow: isScrolled ? "0 4px 24px rgba(0,0,0,0.35)" : "none",
         }}
       >
+        {/* Scroll depth progress line */}
+        <div
+          className="absolute bottom-0 left-0 h-[2px] pointer-events-none transition-[width] duration-100 ease-out"
+          style={{
+            width: `${scrollProgress}%`,
+            background: "linear-gradient(90deg, #38B8B0 0%, #45C49A 65%, #E8875A 100%)",
+            boxShadow: "0 0 10px rgba(56,184,176,0.7)",
+          }}
+        />
+
         {/* Brand */}
-        <div className="flex items-center gap-2.5">
+        <a
+          href="/"
+          onClick={(e) => {
+            e.preventDefault();
+            if (window.location.pathname !== "/") {
+              window.location.href = "/";
+            } else {
+              // Clear any section hash
+              if (window.location.hash) {
+                window.history.replaceState(null, "", "/");
+              }
+              // If already at the top, reload the page fresh
+              if (window.scrollY < 20) {
+                window.location.reload();
+              } else {
+                // Otherwise smoothly glide to the top of the landing page
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }
+          }}
+          className="flex items-center gap-2.5 cursor-pointer select-none group"
+          style={{ textDecoration: "none" }}
+          title="ABHEDYA AI - Top of Landing Page"
+        >
           <Image
             src="/img/Abhedya_logo.png"
             alt="ABHEDYA AI"
             width={44}
             height={44}
-            className="rounded-lg object-contain"
+            className="rounded-lg object-contain transition-transform duration-200 group-hover:scale-105"
           />
           <span
+            className="transition-colors duration-200 group-hover:text-[#38B8B0]"
             style={{
               fontSize: "14px", fontWeight: 700, color: "#F0F4F6", letterSpacing: "-0.01em",
             }}
           >
             ABHEDYA AI
           </span>
-        </div>
+        </a>
 
-        {/* Nav links — visible on md+ */}
-        <nav className="hidden md:flex items-center gap-6">
+        {/* Nav links — centered in header with scroll-spy active highlight */}
+        <nav className="hidden md:flex items-center gap-2 sm:gap-4 absolute left-1/2 -translate-x-1/2">
           {[
             { href: "#how-it-works", label: "How It Works" },
-            { href: "#trust",        label: "Trust Boundary" },
             { href: "#pipeline",     label: "Pipeline" },
-          ].map(({ href, label }) => (
-            <a
-              key={label}
-              href={href}
-              style={{
-                fontSize: "12px", fontFamily: "ui-monospace, monospace",
-                color: "#718B96", textDecoration: "none", transition: "color 160ms",
-              }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#38B8B0")}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#718B96")}
-            >
-              {label}
-            </a>
-          ))}
+            { href: "#trust",        label: "Trust Boundary" },
+          ].map(({ href, label }) => {
+            const sectionKey = href.replace("#", "");
+            const isActive = activeSection === sectionKey;
+            return (
+              <a
+                key={label}
+                href={href}
+                onClick={(e) => scrollToSection(e, href)}
+                className="relative px-3 py-1.5 rounded-full transition-all duration-200"
+                style={{
+                  fontSize: "12px",
+                  fontFamily: "ui-monospace, monospace",
+                  color: isActive ? "#38B8B0" : "#718B96",
+                  background: isActive ? "rgba(56,184,176,0.12)" : "transparent",
+                  border: isActive ? "1px solid rgba(56,184,176,0.28)" : "1px solid transparent",
+                  boxShadow: isActive ? "0 0 12px rgba(56,184,176,0.15)" : "none",
+                  textDecoration: "none",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) (e.currentTarget as HTMLElement).style.color = "#38B8B0";
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) (e.currentTarget as HTMLElement).style.color = "#718B96";
+                }}
+              >
+                {label}
+              </a>
+            );
+          })}
         </nav>
-
-        {/* Security status */}
-        <div className="hidden sm:flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#45C49A" }} />
-          <span
-            style={{
-              fontSize: "11px", fontWeight: 600, fontFamily: "ui-monospace, monospace",
-              color: "#45C49A", letterSpacing: "0.06em",
-            }}
-          >
-            AIR-GAPPED · 0 OUTBOUND BYTES
-          </span>
-        </div>
 
         {/* CTA */}
         <Link href="/workbench">
@@ -328,10 +445,16 @@ export default function LandingPage() {
               background: "rgba(232,135,90,0.12)",
               border: "1px solid rgba(232,135,90,0.28)",
               color: "#E8875A", fontSize: "13px", fontWeight: 600, cursor: "pointer",
-              transition: "background 160ms ease",
+              transition: "background 160ms ease, box-shadow 160ms ease",
             }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "rgba(232,135,90,0.20)")}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "rgba(232,135,90,0.12)")}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "rgba(232,135,90,0.20)";
+              (e.currentTarget as HTMLElement).style.boxShadow = "0 0 12px rgba(232,135,90,0.25)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "rgba(232,135,90,0.12)";
+              (e.currentTarget as HTMLElement).style.boxShadow = "none";
+            }}
           >
             Workbench
             <ArrowRight className="w-3.5 h-3.5" />
@@ -339,12 +462,12 @@ export default function LandingPage() {
         </Link>
       </header>
 
-      {/* Main content — five sections per §10 */}
+      {/* Main content */}
       <main style={{ paddingTop: "56px" }}>
         {/* 1. Hero — hero4.png */}
         <LandingHero />
 
-        {/* 2. What Actually Happens — six-stage interactive (new §10 section) */}
+        {/* 2. What Actually Happens — six-stage interactive */}
         <ComplianceShowcase />
 
         {/* 3. Interactive Pipeline — hero3.png */}

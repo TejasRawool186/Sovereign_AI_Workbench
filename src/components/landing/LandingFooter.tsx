@@ -41,7 +41,7 @@ export function LandingFooter() {
         <div className="relative z-10 max-w-2xl mx-auto px-4 text-center">
           {/* SIH badge */}
           <div
-            className="inline-flex items-center gap-2 status-badge mb-6"
+            className="inline-flex items-center gap-2 status-badge mb-6 scroll-reveal"
             style={{
               background: "rgba(232,135,90,0.12)",
               border: "1px solid rgba(232,135,90,0.28)",
@@ -53,6 +53,7 @@ export function LandingFooter() {
           </div>
 
           <h2
+            className="scroll-reveal delay-75"
             style={{
               fontSize: "clamp(1.875rem,4.5vw,3rem)",
               fontWeight: 800,
@@ -66,23 +67,29 @@ export function LandingFooter() {
             <span style={{ color: "#38B8B0" }}>Air-Gapped Industrial Intelligence?</span>
           </h2>
 
-          <p style={{ fontSize: "1.0625rem", color: "#B8C5CC", lineHeight: 1.65, marginBottom: "2.25rem", maxWidth: "520px", margin: "0 auto 2.25rem" }}>
+          <p
+            className="scroll-reveal delay-150"
+            style={{ fontSize: "1.0625rem", color: "#B8C5CC", lineHeight: 1.65, marginBottom: "2.25rem", maxWidth: "520px", margin: "0 auto 2.25rem" }}
+          >
             Launch the Sovereign Workbench to process real ultrasonic logs,
             run vibration FFT diagnostics, and experience deterministic
             human-in-the-loop validation.
           </p>
 
-          <Link href="/workbench">
-            <button className="btn-cta-primary" style={{ fontSize: "0.9375rem", padding: "14px 32px" }}>
-              Launch Workbench Now
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </Link>
+          <div className="scroll-reveal-scale delay-225">
+            <Link href="/workbench">
+              <button className="btn-cta-primary" style={{ fontSize: "0.9375rem", padding: "14px 32px" }}>
+                Launch Workbench Now
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* ── Footer ──────────────────────────────────────────────────────── */}
       <footer
+        className="scroll-reveal delay-100"
         style={{
           background: "#06131C",
           borderTop: "1px solid rgba(56,184,176,0.08)",

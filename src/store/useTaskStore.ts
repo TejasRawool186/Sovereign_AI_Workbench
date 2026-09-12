@@ -93,6 +93,23 @@ interface TaskState {
   setExecuting: (executing: boolean) => void;
 }
 
+const initialNewTask: TaskItem = {
+  id: "TASK-NEW-01",
+  title: "New Chat",
+  category: "CUSTOM",
+  status: "DRAFT",
+  createdAt: "2026-09-11 00:00:00 UTC",
+  updatedAt: "2026-09-11 00:00:00 UTC",
+  summary: "Fresh sovereign inspection session.",
+  messages: [],
+  traceSteps: defaultExecutionSteps.map((s) => ({
+    ...s,
+    status: "pending",
+    logs: [],
+  })),
+  pinned: false,
+};
+
 const initialTask: TaskItem = {
   id: "TASK-DEMO-01",
   title: "HC-102-B Hydrocracker Unit 3 UT Corrosion Audit",
@@ -719,8 +736,8 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     })),
 
   // Tasks & History
-  tasks: [initialTask, initialCodeVerifyTask, initialVibrationTask, initialOISDTask, initialPendingVibTask],
-  activeTaskId: "TASK-DEMO-01",
+  tasks: [initialNewTask, initialTask, initialCodeVerifyTask, initialVibrationTask, initialOISDTask, initialPendingVibTask],
+  activeTaskId: "TASK-NEW-01",
   setActiveTaskId: (id) => {
     const state = get();
     if (state.activeTaskId === id) return;
@@ -767,6 +784,13 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   createNewTask: () => {
     const state = get();
+
+    // If current active task is already an empty draft, just ensure we're viewing tasks
+    const current = state.tasks.find((t) => t.id === state.activeTaskId);
+    if (current && current.status === "DRAFT" && current.messages.length === 0 && state.messages.length === 0) {
+      set({ activeView: "tasks" });
+      return;
+    }
 
     // Preserve previous active task
     const updatedTasks = state.tasks.map((t) => {
@@ -842,8 +866,8 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     })),
 
   // Messages & Agent Steps
-  messages: initialTask.messages,
-  activeTraceSteps: initialTask.traceSteps,
+  messages: [],
+  activeTraceSteps: initialNewTask.traceSteps,
   isExecuting: false,
   currentRunningNode: null,
 

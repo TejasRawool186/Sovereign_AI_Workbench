@@ -100,7 +100,7 @@ export function InteractivePipeline() {
         loading="lazy"
         quality={80}
         sizes="100vw"
-        className="object-cover object-center pointer-events-none select-none opacity-40"
+        className="object-cover object-top pointer-events-none select-none opacity-40"
         style={{ zIndex: 0 }}
       />
       {/* Pipeline overlay — content must dominate */}
@@ -109,7 +109,7 @@ export function InteractivePipeline() {
       <div className="relative z-10 container-landing">
 
         {/* Section header */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="text-center max-w-2xl mx-auto mb-12 scroll-reveal">
           <div className="inline-block status-badge mb-4"
             style={{ background: "rgba(56,184,176,0.10)", borderColor: "rgba(56,184,176,0.22)", color: "#38B8B0", border: "1px solid" }}
           >
@@ -125,7 +125,7 @@ export function InteractivePipeline() {
         </div>
 
         {/* Stage selector — 6 cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6 scroll-reveal delay-150">
           {steps.map((step, index) => {
             const Icon = step.icon;
             const isActive = activeStep === index;
@@ -186,9 +186,9 @@ export function InteractivePipeline() {
           })}
         </div>
 
-        {/* Active stage detail panel */}
+        {/* Active stage detail panel — stable height to prevent layout shifts */}
         <div
-          className="rounded-xl"
+          className="rounded-xl scroll-reveal-scale delay-225 min-h-[250px] flex flex-col justify-between"
           style={{
             background: "rgba(10,29,40,0.92)",
             backdropFilter: "blur(14px)",
@@ -212,7 +212,7 @@ export function InteractivePipeline() {
               >
                 <ActiveIcon className="w-6 h-6" style={{ color: "#38B8B0" }} />
               </div>
-              <div>
+              <div className="min-h-[44px] flex flex-col justify-center">
                 <div className="flex items-center gap-2.5 mb-0.5">
                   <span
                     style={{
@@ -262,7 +262,7 @@ export function InteractivePipeline() {
           </div>
 
           {/* Panel body */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 flex-1">
             {/* Left — operational behavior */}
             <div
               className="md:col-span-2 px-6 py-6"
@@ -280,37 +280,37 @@ export function InteractivePipeline() {
               >
                 Operational Behavior &amp; Reasoning Flow
               </h4>
-              <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "#B8C5CC" }}>
+              <p className="min-h-[96px] text-[1rem] leading-relaxed" style={{ color: "#B8C5CC" }}>
                 {active.details}
               </p>
             </div>
 
             {/* Right — tech stack */}
-            <div className="px-6 py-6">
-              <h4
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  letterSpacing: "0.09em",
-                  textTransform: "uppercase",
-                  color: "#718B96",
-                  marginBottom: "12px",
-                }}
-              >
-                Enclave Engine Stack
-              </h4>
-              <p
-                style={{
-                  fontSize: "13px",
-                  fontFamily: "ui-monospace, monospace",
-                  fontWeight: 600,
-                  color: "#38B8B0",
-                  lineHeight: 1.6,
-                  whiteSpace: "pre-line",
-                }}
-              >
-                {active.tech.split(" · ").join("\n")}
-              </p>
+            <div className="px-6 py-6 flex flex-col justify-between">
+              <div>
+                <h4
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    letterSpacing: "0.09em",
+                    textTransform: "uppercase",
+                    color: "#718B96",
+                    marginBottom: "12px",
+                  }}
+                >
+                  Enclave Engine Stack
+                </h4>
+                <p
+                  className="min-h-[84px] text-[13px] font-mono font-semibold"
+                  style={{
+                    color: "#38B8B0",
+                    lineHeight: 1.6,
+                    whiteSpace: "pre-line",
+                  }}
+                >
+                  {active.tech.split(" · ").join("\n")}
+                </p>
+              </div>
               <div
                 className="mt-4 flex items-center gap-1.5"
                 style={{ fontSize: "12px", color: "#45C49A" }}

@@ -104,7 +104,7 @@ export function ComplianceShowcase() {
         loading="lazy"
         quality={80}
         sizes="100vw"
-        className="object-cover object-center pointer-events-none select-none"
+        className="object-cover object-top pointer-events-none select-none"
         style={{ zIndex: 0 }}
       />
       {/* Dark overlay to keep content readable */}
@@ -127,7 +127,7 @@ export function ComplianceShowcase() {
 
       <div className="relative z-10 container-landing">
         {/* Section header */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="text-center max-w-2xl mx-auto mb-12 scroll-reveal">
           <div
             className="inline-flex items-center gap-2 status-badge mb-5"
             style={{
@@ -149,7 +149,7 @@ export function ComplianceShowcase() {
         </div>
 
         {/* Stage pills row */}
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
+        <div className="flex flex-wrap justify-center gap-2 mb-8 scroll-reveal delay-150">
           {STAGES.map((stage, idx) => {
             const Icon = stage.icon;
             const isActive = activeIdx === idx;
@@ -174,9 +174,9 @@ export function ComplianceShowcase() {
           })}
         </div>
 
-        {/* Active stage detail card */}
+        {/* Active stage detail card — stable height to prevent layout shifts */}
         <div
-          className="max-w-3xl mx-auto rounded-2xl overflow-hidden"
+          className="max-w-3xl mx-auto rounded-2xl overflow-hidden scroll-reveal-scale delay-225 min-h-[350px] flex flex-col justify-between"
           style={{
             background: "rgba(10,29,40,0.92)",
             border: `1px solid ${active.colorBorder}`,
@@ -197,7 +197,7 @@ export function ComplianceShowcase() {
               >
                 <ActiveIcon className="w-6 h-6" style={{ color: active.color }} />
               </div>
-              <div>
+              <div className="min-h-[64px] flex flex-col justify-center">
                 <div
                   className="text-[11px] font-mono font-bold uppercase tracking-wider mb-0.5"
                   style={{ color: active.color }}
@@ -217,6 +217,7 @@ export function ComplianceShowcase() {
               {STAGES.map((_, i) => (
                 <button
                   key={i}
+                  type="button"
                   onClick={() => setActiveIdx(i)}
                   className="rounded-full transition-all"
                   style={{
@@ -230,21 +231,22 @@ export function ComplianceShowcase() {
           </div>
 
           {/* Card body */}
-          <div className="px-6 py-5 grid grid-cols-1 sm:grid-cols-3 gap-0">
+          <div className="px-6 py-5 grid grid-cols-1 sm:grid-cols-3 gap-0 flex-1">
             {/* Description */}
             <div
-              className="sm:col-span-2 pr-0 sm:pr-6"
+              className="sm:col-span-2 pr-0 sm:pr-6 flex flex-col justify-between"
               style={{ borderRight: "1px solid rgba(56,184,176,0.08)" }}
             >
               <p
-                className="text-[1rem] leading-relaxed"
+                className="text-[1rem] leading-relaxed min-h-[135px]"
                 style={{ color: "#B8C5CC" }}
               >
                 {active.body}
               </p>
               {/* Nav arrows */}
-              <div className="flex items-center gap-3 mt-6">
+              <div className="flex items-center gap-3 mt-4">
                 <button
+                  type="button"
                   onClick={() => setActiveIdx((i) => Math.max(0, i - 1))}
                   disabled={activeIdx === 0}
                   className="px-4 py-1.5 rounded-lg text-[12px] font-semibold transition-all disabled:opacity-30"
@@ -257,6 +259,7 @@ export function ComplianceShowcase() {
                   ← Prev
                 </button>
                 <button
+                  type="button"
                   onClick={() => setActiveIdx((i) => Math.min(STAGES.length - 1, i + 1))}
                   disabled={activeIdx === STAGES.length - 1}
                   className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12px] font-semibold transition-all disabled:opacity-30"
@@ -281,7 +284,7 @@ export function ComplianceShowcase() {
                   Enclave Engine
                 </div>
                 <div
-                  className="px-3 py-2.5 rounded-xl text-[11px] font-mono font-semibold leading-relaxed"
+                  className="px-3 py-2.5 rounded-xl text-[11px] font-mono font-semibold leading-relaxed min-h-[96px] flex items-center"
                   style={{
                     background: active.colorDim,
                     border: `1px solid ${active.colorBorder}`,
