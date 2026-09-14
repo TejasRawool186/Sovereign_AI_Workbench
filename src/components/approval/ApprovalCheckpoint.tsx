@@ -61,51 +61,51 @@ export function ApprovalCheckpoint() {
     <Modal
       isOpen={isApprovalModalOpen}
       onClose={() => setApprovalModalOpen(false)}
-      maxWidth="2xl"
-      title="Human-in-the-Loop Safety Gate"
-      description="Mandatory verification gate — OISD-105 & API 570 compliance policies require authorised engineer sign-off."
+      maxWidth="md"
+      title="HITL Safety Gate"
+      description="OISD-105 & API 570 compliance — engineer sign-off required."
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
 
         {/* ── Warning banner ── */}
         <div
-          className="flex items-start gap-3 px-4 py-3.5 rounded-xl"
+          className="flex items-start gap-2 px-3 py-2 rounded-lg"
           style={{
             background: "rgba(229,184,92,0.08)",
             border: "1px solid rgba(229,184,92,0.25)",
           }}
         >
           <div
-            className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+            className="w-6 h-6 rounded flex items-center justify-center shrink-0"
             style={{ background: "rgba(229,184,92,0.12)", border: "1px solid rgba(229,184,92,0.25)" }}
           >
-            <AlertTriangle className="w-5 h-5" style={{ color: "var(--wb-warning)" }} />
+            <AlertTriangle className="w-3.5 h-3.5" style={{ color: "var(--wb-warning)" }} />
           </div>
           <div>
-            <div className="flex items-center gap-2 flex-wrap mb-0.5">
-              <span className="text-sm font-bold" style={{ color: "var(--wb-warning)" }}>
-                CRITICAL THICKNESS LOSS DETECTED
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[12px] font-bold" style={{ color: "var(--wb-warning)" }}>
+                CRITICAL THICKNESS LOSS
               </span>
               <span
-                className="text-[10px] font-semibold font-mono px-1.5 py-0.5 rounded"
+                className="text-[8px] font-semibold font-mono px-1.5 py-0.5 rounded"
                 style={{
                   background: "rgba(228,106,106,0.12)",
                   color: "var(--wb-danger)",
                   border: "1px solid rgba(228,106,106,0.22)",
                 }}
               >
-                Remaining Life &lt; 2 Years
+                RL &lt; 2 Yrs
               </span>
             </div>
-            <p className="text-[12px]" style={{ color: "var(--wb-text-muted)" }}>
-              Automated execution halted. API 570 mandates authorised engineer digital sign-off before official deliverable synthesis.
+            <p className="text-[10px] mt-0.5" style={{ color: "var(--wb-text-muted)" }}>
+              Automated execution halted. Engineer sign-off required.
             </p>
           </div>
         </div>
 
         {/* ── Telemetry grid ── */}
         <div
-          className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3.5 rounded-xl"
+          className="grid grid-cols-2 gap-1.5 p-2.5 rounded-lg"
           style={{
             background: "var(--wb-surface)",
             border: "1px solid var(--wb-border-subtle)",
@@ -114,13 +114,13 @@ export function ApprovalCheckpoint() {
           {gridItems.map(({ label, value, sub, warn, danger }) => (
             <div key={label} className="space-y-0.5">
               <div
-                className="text-[10px] font-mono uppercase tracking-wider"
+                className="text-[8px] font-mono uppercase tracking-wider"
                 style={{ color: "var(--wb-text-muted)" }}
               >
                 {label}
               </div>
               <div
-                className="text-[12px] font-bold font-mono"
+                className="text-[10px] font-bold font-mono"
                 style={{
                   color: danger
                     ? "var(--wb-danger)"
@@ -132,7 +132,7 @@ export function ApprovalCheckpoint() {
                 {value}
               </div>
               {sub && (
-                <div className="text-[10px] font-mono" style={{ color: "var(--wb-text-muted)" }}>
+                <div className="text-[8px] font-mono" style={{ color: "var(--wb-text-muted)" }}>
                   {sub}
                 </div>
               )}
@@ -141,27 +141,27 @@ export function ApprovalCheckpoint() {
         </div>
 
         {/* ── Recommendation ── */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold" style={{ color: "var(--wb-text)" }}>
-              Proposed Maintenance Recommendation
+            <span className="text-[12px] font-semibold" style={{ color: "var(--wb-text)" }}>
+              Maintenance Action
             </span>
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="flex items-center gap-1 text-[11px] font-medium transition-colors"
+              className="flex items-center gap-1 text-[9px] font-medium transition-colors"
               style={{ color: "var(--wb-teal)" }}
             >
-              <Edit3 className="w-3 h-3" />
+              <Edit3 className="w-2.5 h-2.5" />
               {isEditing ? "Lock" : "Edit"}
             </button>
           </div>
 
           {isEditing ? (
             <textarea
-              rows={3}
+              rows={2}
               value={customComment}
               onChange={(e) => setCustomComment(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg text-[13px] focus:outline-none resize-none leading-relaxed"
+              className="w-full px-2.5 py-1.5 rounded text-[11px] focus:outline-none resize-none leading-relaxed"
               style={{
                 background: "var(--wb-surface)",
                 border: "1px solid var(--wb-teal)",
@@ -170,7 +170,7 @@ export function ApprovalCheckpoint() {
             />
           ) : (
             <div
-              className="px-3.5 py-2.5 rounded-lg text-[13px] leading-relaxed"
+              className="px-2.5 py-1.5 rounded text-[11px] leading-relaxed"
               style={{
                 background: "var(--wb-surface)",
                 border: "1px solid var(--wb-border-subtle)",
@@ -184,28 +184,28 @@ export function ApprovalCheckpoint() {
 
         {/* ── PIN sign-off ── */}
         <div
-          className="rounded-xl p-4 space-y-3"
+          className="rounded-lg p-2.5 space-y-2"
           style={{
             background: "var(--wb-surface)",
             border: "1px solid var(--wb-border-medium)",
           }}
         >
           <div
-            className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5"
+            className="flex items-center justify-between gap-2 pb-1.5"
             style={{ borderBottom: "1px solid var(--wb-border-subtle)" }}
           >
-            <div className="flex items-center gap-2">
-              <UserCheck className="w-4 h-4" style={{ color: "var(--wb-teal)" }} />
-              <span className="text-sm font-semibold" style={{ color: "var(--wb-text)" }}>
-                Operator Sign-off
+            <div className="flex items-center gap-1.5">
+              <UserCheck className="w-3 h-3" style={{ color: "var(--wb-teal)" }} />
+              <span className="text-[12px] font-semibold" style={{ color: "var(--wb-text)" }}>
+                Sign-off
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[12px] font-semibold font-mono" style={{ color: "var(--wb-text)" }}>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-semibold font-mono" style={{ color: "var(--wb-text)" }}>
                 {operatorName}
               </span>
               <span
-                className="text-[10px] font-semibold font-mono px-1.5 py-0.5 rounded"
+                className="text-[8px] font-semibold font-mono px-1.5 py-0.5 rounded"
                 style={{
                   background: "var(--wb-teal-soft)",
                   color: "var(--wb-teal)",
@@ -217,21 +217,21 @@ export function ApprovalCheckpoint() {
             </div>
           </div>
 
-          <div className="flex items-end gap-3">
-            <div className="flex-1 space-y-1.5">
+          <div className="flex items-end gap-2.5">
+            <div className="flex-1 space-y-1">
               <label
-                className="text-[10px] font-mono uppercase tracking-wider"
+                className="text-[8px] font-mono uppercase tracking-wider"
                 style={{ color: "var(--wb-text-muted)" }}
               >
-                Authorization PIN (SHA-256 Seed)
+                Authorization PIN
               </label>
               <div className="relative">
                 <input
                   type="password"
                   value={pin}
                   onChange={(e) => setPin(e.target.value)}
-                  placeholder="Enter PIN…"
-                  className="w-full pl-8 pr-3 py-2 rounded-lg text-[13px] font-mono focus:outline-none transition-colors"
+                  placeholder="PIN…"
+                  className="w-full pl-6 pr-2.5 py-1 rounded text-[11px] font-mono focus:outline-none transition-colors"
                   style={{
                     background: "var(--wb-surface-card)",
                     border: "1px solid var(--wb-border-medium)",
@@ -241,40 +241,40 @@ export function ApprovalCheckpoint() {
                   onBlur={e => (e.currentTarget.style.borderColor = "var(--wb-border-medium)")}
                 />
                 <KeyRound
-                  className="w-3.5 h-3.5 absolute left-2.5 top-2.5"
+                  className="w-2.5 h-2.5 absolute left-2 top-1.5"
                   style={{ color: "var(--wb-text-muted)" }}
                 />
               </div>
             </div>
             <div
-              className="flex items-center gap-1.5 text-[11px] font-semibold font-mono pb-2"
+              className="flex items-center gap-1 text-[9px] font-semibold font-mono"
               style={{ color: "var(--wb-success)" }}
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Hardware Key Valid
+              <ShieldCheck className="w-2.5 h-2.5" />
+              Valid
             </div>
           </div>
         </div>
 
         {/* ── Action buttons ── */}
-        <div className="flex items-center justify-between gap-3 pt-1">
+        <div className="flex items-center justify-between gap-2 pt-1">
           <button
             onClick={handleReject}
-            className="flex items-center gap-1.5 px-3 h-9 rounded-lg text-[13px] font-semibold transition-colors"
+            className="flex items-center gap-1 px-2.5 h-7 rounded text-[11px] font-semibold transition-colors"
             style={{
               background: "rgba(228,106,106,0.08)",
               border: "1px solid rgba(228,106,106,0.25)",
               color: "var(--wb-danger)",
             }}
           >
-            <XCircle className="w-4 h-4" />
+            <XCircle className="w-3 h-3" />
             Reject
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setApprovalModalOpen(false)}
-              className="px-3 h-9 rounded-lg text-[13px] font-medium transition-colors"
+              className="px-2.5 h-7 rounded text-[11px] font-medium transition-colors"
               style={{
                 background: "transparent",
                 border: "1px solid var(--wb-border-medium)",
@@ -286,7 +286,7 @@ export function ApprovalCheckpoint() {
             <button
               onClick={handleApprove}
               disabled={isSigning}
-              className="flex items-center gap-1.5 px-5 h-9 rounded-lg text-[13px] font-bold transition-colors disabled:opacity-50"
+              className="flex items-center gap-1 px-3 h-7 rounded text-[11px] font-bold transition-colors disabled:opacity-50"
               style={{
                 background: "var(--wb-teal)",
                 color: "#07151D",
@@ -294,7 +294,7 @@ export function ApprovalCheckpoint() {
                 cursor: isSigning ? "wait" : "pointer",
               }}
             >
-              <FileCheck className="w-4 h-4" />
+              <FileCheck className="w-3 h-3" />
               {isSigning ? "Signing…" : "Approve & Sign"}
             </button>
           </div>

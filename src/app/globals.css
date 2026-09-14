@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Chart skeleton breathing animation ─────────────────────────────────── */
+@keyframes skeletonBreath {
+  0%, 100% { opacity: 0.18; }
+  50%       { opacity: 0.38; }
+}
+
 /* =============================================================================
    ABHEDYA AI — Unified Design Token System
    Industrial · Sovereign · Air-Gapped · Mission-Critical

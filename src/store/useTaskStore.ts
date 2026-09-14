@@ -882,11 +882,16 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       `${state.operatorName}:${state.operatorRole}:${Date.now()}:${pin}`
     );
 
-    const updatedSteps = state.activeTraceSteps.map((step) =>
+    const approvedAt = new Date().toISOString().replace("T", " ").slice(0, 19) + " UTC";
+
+    // ── Step 1: close modal, mark human_checkpoint completed ──────────────
+    const stepsAfterHITL = state.activeTraceSteps.map((step) =>
       step.node === "human_checkpoint"
         ? {
             ...step,
             status: "completed" as AgentNodeStatus,
+            durationMs: 320,
+            outputSummary: `Signed by ${state.operatorName} (${state.operatorRole})`,
             logs: [
               ...step.logs,
               `Verification PIN signed by ${state.operatorName} (${state.operatorRole}).`,
@@ -894,65 +899,107 @@ export const useTaskStore = create<TaskState>((set, get) => ({
             ],
           }
         : step.node === "generate_docx"
+        ? { ...step, status: "running" as AgentNodeStatus, logs: [] }
+        : step
+    );
+
+    // Update message to approved (no deliverable yet) + sync traceSteps on msg
+    const messagesAfterApprove = [...state.messages];
+    const lastMsgIdx = messagesAfterApprove.findLastIndex((m) => m.role === "assistant");
+    if (lastMsgIdx !== -1) {
+      messagesAfterApprove[lastMsgIdx] = {
+        ...messagesAfterApprove[lastMsgIdx],
+        requiresApproval: false,
+        approvalStatus: "approved",
+        approvalDetails: {
+          approvedBy: state.operatorName,
+          approvedAt,
+          signatureHash: hash,
+          operatorRole: state.operatorRole,
+          comment: customComment || "Emergency ASTM A335 Grade P22 spool piece fabrication authorized.",
+        },
+        traceSteps: stepsAfterHITL,
+      };
+    }
+
+    set({
+      activeTraceSteps: stepsAfterHITL,
+      messages: messagesAfterApprove,
+      isExecuting: true,          // keep spinner alive for generate_docx
+      isApprovalModalOpen: false,
+      activeApprovalData: null,
+    });
+
+    // ── Step 2: animate generate_docx running (800 ms) ────────────────────
+    await new Promise<void>((res) => setTimeout(res, 300));
+
+    // tick a log into generate_docx
+    set((s) => {
+      const steps = s.activeTraceSteps.map((step) =>
+        step.node === "generate_docx"
+          ? { ...step, logs: ["Synthesizing executive .docx report with embedded signature blocks…"] }
+          : step
+      );
+      const msgs = s.messages.map((m, i) =>
+        i === s.messages.findLastIndex((x) => x.role === "assistant")
+          ? { ...m, traceSteps: steps }
+          : m
+      );
+      return { activeTraceSteps: steps, messages: msgs };
+    });
+
+    await new Promise<void>((res) => setTimeout(res, 700));
+
+    // ── Step 3: mark generate_docx completed + attach deliverable ─────────
+    const stepsCompleted = get().activeTraceSteps.map((step) =>
+      step.node === "generate_docx"
         ? {
             ...step,
             status: "completed" as AgentNodeStatus,
-            durationMs: 600,
+            durationMs: 640,
+            outputSummary: "Inspection_Approval_Note_HC-102-B.docx · SHA-256 stamped",
             logs: [
-              "Synthesized executive .docx inspection report with embedded signature blocks.",
-              `Stamping digital hash ${hash} into immutable audit ledger.`,
+              "Synthesizing executive .docx report with embedded signature blocks…",
+              `SHA-256 digital stamp applied: ${hash.slice(0, 16)}…`,
+              "Immutable audit ledger updated.",
             ],
           }
         : step
     );
 
-    // Update last assistant message
-    const updatedMessages = [...state.messages];
-    const lastMsgIndex = updatedMessages.findLastIndex((m) => m.role === "assistant");
-    if (lastMsgIndex !== -1) {
-      updatedMessages[lastMsgIndex] = {
-        ...updatedMessages[lastMsgIndex],
-        requiresApproval: false,
-        approvalStatus: "approved",
-        approvalDetails: {
-          approvedBy: state.operatorName,
-          approvedAt: new Date().toISOString().replace("T", " ").slice(0, 19) + " UTC",
-          signatureHash: hash,
-          operatorRole: state.operatorRole,
-          comment: customComment || "Emergency ASTM A335 Grade P22 spool piece fabrication authorized.",
-        },
-        deliverable: {
-          filename: "Inspection_Approval_Note_HC-102-B.docx",
-          fileSize: 1845000,
-          sha256: hash,
-          generatedAt: new Date().toISOString().replace("T", " ").slice(0, 19) + " UTC",
-          downloadUrl: "#",
-        },
-      };
-    }
+    const deliverable = {
+      filename: "Inspection_Approval_Note_HC-102-B.docx",
+      fileSize: 1845000,
+      sha256: hash,
+      generatedAt: approvedAt,
+      downloadUrl: "#",
+    };
 
-    const updatedTasks = state.tasks.map((t) => {
-      if (t.id === state.activeTaskId) {
-        return {
-          ...t,
-          status: "COMPLETED" as TaskStatus,
-          messages: updatedMessages,
-          traceSteps: updatedSteps,
-          deliverableUrl: "#",
-          deliverableHash: hash,
-        };
-      }
-      return t;
-    });
+    const finalMessages = get().messages.map((m, i) =>
+      i === get().messages.findLastIndex((x) => x.role === "assistant")
+        ? { ...m, traceSteps: stepsCompleted, deliverable }
+        : m
+    );
+
+    const updatedTasks = get().tasks.map((t) =>
+      t.id === get().activeTaskId
+        ? {
+            ...t,
+            status: "COMPLETED" as TaskStatus,
+            messages: finalMessages,
+            traceSteps: stepsCompleted,
+            deliverableUrl: "#",
+            deliverableHash: hash,
+          }
+        : t
+    );
 
     set({
       tasks: updatedTasks,
-      activeTraceSteps: updatedSteps,
-      messages: updatedMessages,
+      activeTraceSteps: stepsCompleted,
+      messages: finalMessages,
       isExecuting: false,
       currentRunningNode: null,
-      isApprovalModalOpen: false,
-      activeApprovalData: null,
       activeContextTab: "deliverable",
     });
 

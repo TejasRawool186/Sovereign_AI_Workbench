@@ -21,40 +21,49 @@ export function simulateAgentTraceStream(
       // Step 1: OCR Extraction
       if (isAborted) return;
       callbacks.onStepStart("step-1", "ocr_extract");
-      await delay(200);
+      await delay(500);
       callbacks.onStepLog("step-1", "Initializing local PaddleOCR 2.8 engine with CUDA acceleration...");
-      await delay(300);
+      await delay(800);
       callbacks.onStepLog("step-1", "Detected 18 thickness measurement rows in HC_102_B_UT_Inspection_Report.pdf.");
-      await delay(200);
+      await delay(600);
       callbacks.onStepLog("step-1", "Qwen2.5-VL-7B: Localized pitting near weld HAZ in corrosion_flange.png — confidence 0.89. Requires engineer confirmation.");
-      await delay(350);
-      callbacks.onStepComplete("step-1", 850, "Extracted 18 CML measurements + vision pitting flag (conf. 0.89).");
+      await delay(900);
+      callbacks.onStepComplete("step-1", 2850, "Extracted 18 CML measurements + vision pitting flag (conf. 0.89).");
+
+      // Wait before next step
+      await delay(400);
 
       // Step 2: RAG Search
       if (isAborted) return;
       callbacks.onStepStart("step-2", "rag_search");
-      await delay(150);
+      await delay(400);
       callbacks.onStepLog("step-2", "Querying ChromaDB vector collection [#Hydrocracker-SOPs, #Piping-API570]...");
-      await delay(200);
+      await delay(600);
       callbacks.onStepLog("step-2", "Retrieved MRPL Hydrocracker-SOPs p.14 — 'HP Recycle Flange Inspection Requirements' (similarity: 0.91).");
-      await delay(70);
+      await delay(300);
       callbacks.onStepLog("step-2", "Retrieved API 570 §7.1.1 Piping Inspection Code (similarity: 0.94). Router: Qwen2.5-VL-7B + Qwen2.5-14B selected.");
-      await delay(150);
-      callbacks.onStepComplete("step-2", 420, "Retrieved 3 grounding SOP clauses (avg similarity 0.93).");
+      await delay(500);
+      callbacks.onStepComplete("step-2", 1420, "Retrieved 3 grounding SOP clauses (avg similarity 0.93).");
+
+      // Wait before next step
+      await delay(400);
 
       // Step 3: Industrial Reasoning & Recommendation
       if (isAborted) return;
       callbacks.onStepStart("step-3", "recommend");
-      await delay(300);
+      await delay(600);
       callbacks.onStepLog("step-3", "Executing sandbox corrosion rate calculation: CR = (6.02 - 3.20) / 5.0 = 0.564 mm/yr...");
-      await delay(400);
+      await delay(800);
       callbacks.onStepLog("step-3", "Remaining life: RL = (3.20 - 2.50) / 0.564 = 1.24 years. MAWT breach projected Q3 2027.");
-      await delay(300);
+      await delay(700);
       callbacks.onStepLog("step-3", "CRITICAL: RL < 1.5 years — mandatory Lead Corrosion Engineer review required per OISD-105 §4.2.1.");
-      await delay(500);
-      callbacks.onStepComplete("step-3", 1200, "CR: 0.564 mm/yr · RL: 1.24 yrs · CRITICAL risk → HITL gate triggered.");
+      await delay(1000);
+      callbacks.onStepComplete("step-3", 3200, "CR: 0.564 mm/yr · RL: 1.24 yrs · CRITICAL risk → HITL gate triggered.");
 
-      // Stream Tokens into canvas
+      // Wait before starting text stream
+      await delay(600);
+
+      // Stream Tokens into canvas (slower, more realistic)
       const fullResponseText = `### Ultrasonic Thickness (UT) Inspection & Integrity Assessment Report
 **Plant:** MRPL Hydrocracker Unit 3 · **Asset:** HC-102-B (High-Pressure Recycle Flange)
 **Report ID:** NDT-2026-00481 · **Inspector:** INS-017 · **Approval Ref:** APR-2026-00073
@@ -89,13 +98,18 @@ Qwen2.5-VL-7B analysis of \`corrosion_flange.png\` flagged **localized pitting n
       for (const word of words) {
         if (isAborted) return;
         callbacks.onTokenStream(word + " ");
-        await delay(25);
+        await delay(45); // Slower, more realistic streaming like ChatGPT
       }
+
+      // Wait before HITL step
+      await delay(800);
 
       // Step 4: Human Checkpoint Gate
       if (isAborted) return;
       callbacks.onStepStart("step-4", "human_checkpoint");
+      await delay(400);
       callbacks.onStepLog("step-4", "Safety Critical alert triggered. Remaining life 1.24 yrs < 1.5 yr threshold. Halting pipeline at Human-in-the-Loop Gate.");
+      await delay(600);
       callbacks.onRequiresApproval({
         criticalPoint: "CML-HC-102-B",
         currentThickness: "3.20 mm",
@@ -141,40 +155,49 @@ export function simulateCodingScenarioStream(
       // cv-step-1: CML Table Extraction
       if (isAborted) return;
       callbacks.onStepStart("cv-step-1", "rag_search");
-      await delay(150);
+      await delay(400);
       callbacks.onStepLog("cv-step-1", "Parsing structured CML measurement table from prompt context...");
-      await delay(250);
+      await delay(600);
       callbacks.onStepLog("cv-step-1", "Extracted 4 CML rows: nominal, measured, MAWT, inspection interval.");
-      await delay(200);
-      callbacks.onStepComplete("cv-step-1", 480, "CML table parsed — 4 data rows ready for code generation.");
+      await delay(500);
+      callbacks.onStepComplete("cv-step-1", 1480, "CML table parsed — 4 data rows ready for code generation.");
+
+      // Wait before next step
+      await delay(300);
 
       // cv-step-2: Code Generation (Qwen2.5-Coder-7B — different model from golden path)
       if (isAborted) return;
       callbacks.onStepStart("cv-step-2", "code_generate");
-      await delay(200);
+      await delay(500);
       callbacks.onStepLog("cv-step-2", "Router: input=structured_table · task=code · GPU headroom=6.2GB → Qwen2.5-Coder-7B selected.");
-      await delay(150);
-      callbacks.onStepLog("cv-step-2", "NOTE: Qwen2.5-Coder-7B selected — distinct from VL+reasoning pair used in NDT audit scenario.");
-      await delay(300);
-      callbacks.onStepLog("cv-step-2", "Generating Python script: corrosion_rate_calc.py (pandas + numpy, no external imports)...");
       await delay(400);
-      callbacks.onStepComplete("cv-step-2", 920, "Script generated: corrosion_rate_calc.py — 42 lines, zero external dependencies.");
+      callbacks.onStepLog("cv-step-2", "NOTE: Qwen2.5-Coder-7B selected — distinct from VL+reasoning pair used in NDT audit scenario.");
+      await delay(700);
+      callbacks.onStepLog("cv-step-2", "Generating Python script: corrosion_rate_calc.py (pandas + numpy, no external imports)...");
+      await delay(900);
+      callbacks.onStepComplete("cv-step-2", 2520, "Script generated: corrosion_rate_calc.py — 42 lines, zero external dependencies.");
+
+      // Wait before next step
+      await delay(400);
 
       // cv-step-3: Sandbox Execution (--network none container)
       if (isAborted) return;
       callbacks.onStepStart("cv-step-3", "sandbox_execute");
-      await delay(200);
+      await delay(600);
       callbacks.onStepLog("cv-step-3", "Spawning Docker container: python:3.11-slim --network none --memory 256m --cpus 0.5");
-      await delay(300);
+      await delay(800);
       callbacks.onStepLog("cv-step-3", "Container network: DISABLED. Outbound sockets: BLOCKED. Zero egress enforced.");
-      await delay(400);
+      await delay(900);
       callbacks.onStepLog("cv-step-3", "Executing corrosion_rate_calc.py... stdout captured.");
-      await delay(500);
+      await delay(1200);
       callbacks.onStepLog("cv-step-3", "Container exited 0. Stdout: 4 rows computed. No stderr.");
-      await delay(200);
-      callbacks.onStepComplete("cv-step-3", 1380, "Sandbox execution clean — exit 0 · network none · stdout captured.");
+      await delay(500);
+      callbacks.onStepComplete("cv-step-3", 3880, "Sandbox execution clean — exit 0 · network none · stdout captured.");
 
-      // Stream the assistant response
+      // Wait before text stream
+      await delay(500);
+
+      // Stream the assistant response (slower than before)
       const fullResponse = `### Code Verification Task — Corrosion Rate & Remaining Life Calculator
 **Task Type:** Code Generation + Sandbox Execution
 **Router Decision:** Qwen2.5-Coder-7B (coding-oriented) — distinct from NDT scenario models
@@ -231,31 +254,38 @@ Self-RAG cross-check: stdout values match SOP-grounded expected results within �
       for (const word of words) {
         if (isAborted) return;
         callbacks.onTokenStream(word + " ");
-        await delay(18);
+        await delay(40); // Slightly slower than NDT scenario
       }
+
+      // Wait before next step
+      await delay(400);
 
       // cv-step-4: Self-RAG Verification
       if (isAborted) return;
       callbacks.onStepStart("cv-step-4", "sandbox_verify");
-      await delay(200);
+      await delay(500);
       callbacks.onStepLog("cv-step-4", "Cross-checking stdout values against SOP-grounded expected results...");
-      await delay(300);
+      await delay(700);
       callbacks.onStepLog("cv-step-4", "CML-HC-102-B: stdout CR=0.564 vs expected 0.564 ✓ · RL=1.24 vs expected 1.24 ✓");
-      await delay(200);
+      await delay(500);
       callbacks.onStepLog("cv-step-4", "All 4 CML rows within ±0.01 mm/yr tolerance. No unsupported claims detected.");
-      await delay(150);
-      callbacks.onStepComplete("cv-step-4", 620, "Self-RAG verification PASSED — all outputs evidence-grounded.");
+      await delay(400);
+      callbacks.onStepComplete("cv-step-4", 2120, "Self-RAG verification PASSED — all outputs evidence-grounded.");
+
+      // Wait before final step
+      await delay(300);
 
       // cv-step-5: Package deliverable
       if (isAborted) return;
       callbacks.onStepStart("cv-step-5", "generate_docx");
-      await delay(300);
+      await delay(700);
       callbacks.onStepLog("cv-step-5", "Packaging corrosion_rate_calc.py + verified stdout into audit record...");
-      await delay(250);
+      await delay(600);
       callbacks.onStepLog("cv-step-5", "SHA-256 hash stamped. Zero outbound bytes throughout session.");
-      await delay(200);
-      callbacks.onStepComplete("cv-step-5", 540, "HC102B_CodeVerification_Results.py.zip packaged and sealed.");
+      await delay(500);
+      callbacks.onStepComplete("cv-step-5", 1740, "HC102B_CodeVerification_Results.py.zip packaged and sealed.");
 
+      await delay(400);
       callbacks.onTaskComplete();
     } catch (err: any) {
       if (!isAborted) {

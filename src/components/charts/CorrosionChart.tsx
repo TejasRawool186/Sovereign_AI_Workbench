@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   LineChart,
   Line,
@@ -28,6 +28,31 @@ export function CorrosionChart({
   description = "Historical ultrasonic thickness measurements and linear degradation projection.",
   threshold = 6.5,
 }: CorrosionChartProps) {
+  // Progressive reveal: feed data points one by one with a slow, calm stagger
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [animDone, setAnimDone] = useState(false);
+
+  useEffect(() => {
+    setVisibleCount(0);
+    setAnimDone(false);
+    let i = 0;
+    // Start with a short pause before drawing begins, then reveal one point every 350ms
+    const startTimeout = setTimeout(() => {
+      const interval = setInterval(() => {
+        i++;
+        setVisibleCount(i);
+        if (i >= data.length) {
+          clearInterval(interval);
+          setAnimDone(true);
+        }
+      }, 350);
+      return () => clearInterval(interval);
+    }, 300);
+    return () => clearTimeout(startTimeout);
+  }, [data]);
+
+  const visibleData = data.slice(0, visibleCount);
+
   return (
     <Card className="my-4 p-4 sm:p-5 bg-surface-card border-border-medium shadow-card overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-border-subtle">
@@ -44,7 +69,10 @@ export function CorrosionChart({
             </p>
           )}
         </div>
-        <div className="flex items-center gap-1.5">
+        <div
+          className="flex items-center gap-1.5 transition-opacity duration-300"
+          style={{ opacity: animDone ? 1 : 0 }}
+        >
           <Badge variant="danger" size="sm">
             MAWT Limit: {threshold} mm
           </Badge>
@@ -57,7 +85,7 @@ export function CorrosionChart({
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
-            data={data}
+            data={visibleData}
             margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#222227" />
@@ -87,18 +115,21 @@ export function CorrosionChart({
                 name === "thickness" ? "Measured Thickness" : "MAWT Retirement Limit",
               ]}
             />
-            <ReferenceLine
-              y={threshold}
-              label={{
-                value: "API 570 MAWT (6.5 mm)",
-                fill: "#EF4444",
-                fontSize: 10,
-                position: "insideBottomRight",
-              }}
-              stroke="#EF4444"
-              strokeDasharray="4 4"
-              strokeWidth={1.5}
-            />
+            {/* Only show the MAWT reference line once the line has drawn past it */}
+            {animDone && (
+              <ReferenceLine
+                y={threshold}
+                label={{
+                  value: `API 570 MAWT (${threshold} mm)`,
+                  fill: "#EF4444",
+                  fontSize: 10,
+                  position: "insideBottomRight",
+                }}
+                stroke="#EF4444"
+                strokeDasharray="4 4"
+                strokeWidth={1.5}
+              />
+            )}
             <Line
               type="monotone"
               dataKey="thickness"
@@ -106,15 +137,19 @@ export function CorrosionChart({
               strokeWidth={2.5}
               dot={{ fill: "#FF6A00", r: 4 }}
               activeDot={{ r: 6, fill: "#FF8533", stroke: "#fff" }}
+              isAnimationActive={false} /* we animate by slicing data ourselves */
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-3 pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] font-mono text-primary-muted">
+      <div
+        className="mt-3 pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] font-mono text-primary-muted transition-opacity duration-500"
+        style={{ opacity: animDone ? 1 : 0 }}
+      >
         <div className="flex items-center gap-1.5 text-status-danger">
           <AlertTriangle className="w-3.5 h-3.5" />
-          <span>Calculated Corrosion Rate: 0.82 mm/year (ASTM A335 Grade P22)</span>
+          <span>Calculated Corrosion Rate: 0.564 mm/year · MAWT breach projected Q3 2027</span>
         </div>
         <span>Standard: API 570 Section 7.1</span>
       </div>

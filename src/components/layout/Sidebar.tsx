@@ -113,10 +113,11 @@ export function Sidebar() {
   ];
 
   const handlePresetClick = (preset: typeof presets[0]) => {
+    // Pre-fill the composer — do NOT execute. User clicks Run Task.
     setActiveView("tasks");
     window.dispatchEvent(
-      new CustomEvent("abhedya:preset", {
-        detail: { prompt: preset.prompt, file: (preset as any).file },
+      new CustomEvent("abhedya:prefill", {
+        detail: { prompt: preset.prompt, file: (preset as any).file ?? null },
       })
     );
   };
@@ -256,7 +257,20 @@ export function Sidebar() {
             return (
               <div
                 key={task.id}
-                onClick={() => { setActiveTaskId(task.id); setActiveView("tasks"); }}
+                onClick={() => {
+                  setActiveTaskId(task.id);
+                  setActiveView("tasks");
+                  // Pre-fill composer with this task's original user prompt
+                  const lastUserMsg = [...(task.messages ?? [])].reverse().find((m) => m.role === "user");
+                  if (lastUserMsg) {
+                    const file = lastUserMsg.attachments?.[0] ?? null;
+                    window.dispatchEvent(
+                      new CustomEvent("abhedya:prefill", {
+                        detail: { prompt: lastUserMsg.content, file },
+                      })
+                    );
+                  }
+                }}
                 className="group relative p-2.5 rounded-lg cursor-pointer transition-all"
                 style={{
                   background: isSelected ? "var(--wb-surface-card)" : "transparent",

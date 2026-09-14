@@ -37,6 +37,33 @@ export function Composer({ onSendMessage }: ComposerProps) {
     }
   }, [content]);
 
+  // Listen for prefill events from welcome cards, sidebar presets, and task clicks
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { prompt, file } = (e as CustomEvent<{ prompt: string; file: AttachedFile | null }>).detail;
+      setContent(prompt ?? "");
+      setSlashFilter(null);
+      if (file) {
+        setAttachments([file]);
+      } else {
+        setAttachments([]);
+      }
+      // Focus and resize after state settles
+      requestAnimationFrame(() => {
+        const ta = textareaRef.current;
+        if (ta) {
+          ta.style.height = "auto";
+          ta.style.height = `${Math.min(ta.scrollHeight, 180)}px`;
+          ta.focus();
+          // Move cursor to end
+          ta.setSelectionRange(ta.value.length, ta.value.length);
+        }
+      });
+    };
+    window.addEventListener("abhedya:prefill", handler);
+    return () => window.removeEventListener("abhedya:prefill", handler);
+  }, []);
+
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value;
     setContent(val);

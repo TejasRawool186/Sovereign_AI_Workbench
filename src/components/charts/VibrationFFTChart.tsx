@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   AreaChart,
   Area,
@@ -29,6 +29,31 @@ export function VibrationFFTChart({
   description = "Fast Fourier Transform amplitude spectrum highlighting mechanical unbalance & bearing defect peaks.",
   threshold = 2.8,
 }: VibrationFFTChartProps) {
+  // Progressive left-to-right reveal: slow calm scan — one bin every 280ms
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [animDone, setAnimDone] = useState(false);
+
+  useEffect(() => {
+    setVisibleCount(0);
+    setAnimDone(false);
+    let i = 0;
+    // Small initial pause so the chart card settles before drawing
+    const startTimeout = setTimeout(() => {
+      const interval = setInterval(() => {
+        i++;
+        setVisibleCount(i);
+        if (i >= data.length) {
+          clearInterval(interval);
+          setAnimDone(true);
+        }
+      }, 280); // 280ms per bin — calm left-to-right frequency scan
+      return () => clearInterval(interval);
+    }, 300);
+    return () => clearTimeout(startTimeout);
+  }, [data]);
+
+  const visibleData = data.slice(0, visibleCount);
+
   return (
     <Card className="my-4 p-4 sm:p-5 bg-surface-card border-border-medium shadow-card overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-border-subtle">
@@ -45,7 +70,10 @@ export function VibrationFFTChart({
             </p>
           )}
         </div>
-        <div className="flex items-center gap-1.5">
+        <div
+          className="flex items-center gap-1.5 transition-opacity duration-300"
+          style={{ opacity: animDone ? 1 : 0 }}
+        >
           <Badge variant="warning" size="sm">
             ISO 10816 Limit: {threshold} mm/s
           </Badge>
@@ -58,7 +86,7 @@ export function VibrationFFTChart({
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={data}
+            data={visibleData}
             margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
           >
             <defs>
@@ -97,18 +125,21 @@ export function VibrationFFTChart({
                 "Vibration Velocity",
               ]}
             />
-            <ReferenceLine
-              y={threshold}
-              label={{
-                value: "Alarm Threshold (2.8 mm/s)",
-                fill: "#F59E0B",
-                fontSize: 10,
-                position: "insideBottomRight",
-              }}
-              stroke="#F59E0B"
-              strokeDasharray="4 4"
-              strokeWidth={1.5}
-            />
+            {/* Threshold line fades in after scan is done */}
+            {animDone && (
+              <ReferenceLine
+                y={threshold}
+                label={{
+                  value: `Alarm Threshold (${threshold} mm/s)`,
+                  fill: "#F59E0B",
+                  fontSize: 10,
+                  position: "insideBottomRight",
+                }}
+                stroke="#F59E0B"
+                strokeDasharray="4 4"
+                strokeWidth={1.5}
+              />
+            )}
             <Area
               type="monotone"
               dataKey="amplitudeMmS"
@@ -116,12 +147,16 @@ export function VibrationFFTChart({
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorAmplitude)"
+              isAnimationActive={false} /* data-slice approach handles animation */
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-3 pt-2 border-t border-border-subtle flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-primary-muted">
+      <div
+        className="mt-3 pt-2 border-t border-border-subtle flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-primary-muted transition-opacity duration-500"
+        style={{ opacity: animDone ? 1 : 0 }}
+      >
         <div className="flex items-center gap-1.5 text-status-warning">
           <AlertCircle className="w-3.5 h-3.5" />
           <span>Severe Outer Race Defect Spike Detected at 148.5 Hz (BPFO)</span>
